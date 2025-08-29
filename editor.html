@@ -1,0 +1,2293 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Конструктор сайту | Швейка</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-200: #bae6fd;
+            --primary-300: #7dd3fc;
+            --primary-400: #38bdf8;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --primary-800: #075985;
+            --primary-900: #0c4a6e;
+            --secondary-50: #f8fafc;
+            --secondary-100: #f1f5f9;
+            --secondary-200: #e2e8f0;
+            --secondary-300: #cbd5e1;
+            --secondary-400: #94a3b8;
+            --secondary-500: #64748b;
+            --secondary-600: #475569;
+            --secondary-700: #334155;
+            --secondary-800: #1e293b;
+            --secondary-900: #0f172a;
+            --amber-50: #fffbeb;
+            --amber-100: #fef3c7;
+            --amber-200: #fde68a;
+            --amber-300: #fcd34d;
+            --amber-400: #fbbf24;
+            --amber-500: #f59e0b;
+            --amber-600: #d97706;
+            --amber-700: #b45309;
+            --amber-800: #92400e;
+            --amber-900: #78350f;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            /* Обшарманий градієнт на весь екран */
+            background-image:
+                radial-gradient(at 20% 20%, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.00) 40%),
+                radial-gradient(at 80% 0%, rgba(251,191,36,0.18) 0%, rgba(255,255,255,0.00) 48%),
+                radial-gradient(at 0% 80%, rgba(14,165,233,0.14) 0%, rgba(255,255,255,0.00) 52%),
+                radial-gradient(at 100% 80%, rgba(239,68,68,0.12) 0%, rgba(255,255,255,0.00) 50%),
+                linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            background-attachment: fixed, fixed, fixed, fixed, fixed;
+            background-size: cover;
+        }
+
+        /* Легка текстура-"шум" зверху (дуже делікатна) */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.06;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.35"/></svg>');
+            background-repeat: repeat;
+            background-size: 320px 320px;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 80px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 1.5rem;
+            z-index: 50;
+            transition: var(--transition);
+        }
+
+        .sidebar:hover {
+            width: 240px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar:hover .sidebar-icon {
+            display: none;
+        }
+
+        .sidebar:hover .sidebar-text {
+            display: block;
+        }
+
+        .sidebar-item {
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--secondary-600);
+        }
+
+        .sidebar-item:hover {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            border-left: 3px solid var(--primary-500);
+        }
+
+        .sidebar-icon {
+            font-size: 1.25rem;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .sidebar-text {
+            display: none;
+            margin-left: 1rem;
+            font-weight: 500;
+        }
+
+        .main-content {
+            margin-left: 80px;
+            padding: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-800);
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--secondary-700);
+        }
+
+        .input, .textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--secondary-200);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input:focus, .textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-300);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-100);
+            color: var(--secondary-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-200);
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 8px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background: var(--primary-600);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .product-card-admin {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .product-card-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-img-admin {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .layout-item {
+            cursor: move;
+            user-select: none;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .layout-item:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+        }
+
+        .layout-item.dragging {
+            opacity: 0.5;
+        }
+
+        .layout-item.over {
+            border-top: 2px solid var(--primary-600);
+        }
+
+        .element-layout-item {
+            cursor: move;
+            user-select: none;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .element-layout-item:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+        }
+
+        .element-layout-item.dragging {
+            opacity: 0.5;
+        }
+
+        .element-layout-item.over {
+            border-top: 2px solid var(--primary-600);
+        }
+
+        .element-layout-item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .element-layout-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: var(--primary-600);
+        }
+
+        .element-layout-item-title {
+            font-weight: 500;
+            color: var(--secondary-800);
+        }
+
+        .element-layout-item-description {
+            font-size: 0.85rem;
+            color: var(--secondary-500);
+            margin-top: 0.25rem;
+        }
+
+        .element-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #10b981;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background: var(--secondary-800);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--secondary-800) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 1.5rem 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-badge.online {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.offline {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--primary-100);
+            border-top: 3px solid var(--primary-600);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px dashed var(--secondary-300);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--secondary-300);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+        }
+
+        .preview-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: var(--primary-600);
+            border: 1px solid var(--primary-300);
+            border-radius: 8px;
+            font-weight: 500;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .preview-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .scale-in {
+            animation: scaleIn 0.3s ease-out forwards;
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        @keyframes scaleIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .sortable {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem;
+            cursor: move;
+            transition: var(--transition);
+        }
+
+        .sortable:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+
+        .search-box {
+            position: relative;
+            display: inline-block;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-400);
+        }
+
+        .search-box input {
+            padding-left: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-item active" data-tab="content">
+            <div class="sidebar-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="sidebar-text">Контент</div>
+        </div>
+        <div class="sidebar-item" data-tab="products">
+            <div class="sidebar-icon"><i class="fas fa-shopping-bag"></i></div>
+            <div class="sidebar-text">Товари</div>
+        </div>
+        <div class="sidebar-item" data-tab="design">
+            <div class="sidebar-icon"><i class="fas fa-palette"></i></div>
+            <div class="sidebar-text">Дизайн</div>
+        </div>
+        <div class="sidebar-item" data-tab="layout">
+            <div class="sidebar-icon"><i class="fas fa-columns"></i></div>
+            <div class="sidebar-text">Розташування</div>
+        </div>
+        <div class="mt-auto w-full">
+            <div class="sidebar-item tooltip" id="previewSiteBtn">
+                <div class="sidebar-icon"><i class="fas fa-eye"></i></div>
+                <div class="sidebar-text">Переглянути сайт</div>
+                <span class="tooltip-text">Переглянути поточний стан сайту</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <!-- Header -->
+            <header class="card mb-6 p-4 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-primary-700 floating">Конструктор сайту</h1>
+                    <p class="text-secondary-600 mt-1">Налаштуйте свій сайт за кілька хвилин</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="status-badge online">
+                        <i class="fas fa-circle mr-1 text-xs"></i> Онлайн
+                    </div>
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                            <i class="fas fa-user text-primary-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs Content -->
+            <div class="tabs-container">
+                <!-- Content Tab -->
+                <div class="tab-content active p-4" id="contentTab">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="form-control slide-in" style="animation-delay: 0.1s">
+                            <label for="siteName">Назва сайту</label>
+                            <input type="text" id="siteName" class="input" value="РетроШвейка">
+                            <p class="text-secondary-500 text-sm mt-1">Це буде відображатися в заголовку та в браузерній вкладці</p>
+                        </div>
+                        <div class="form-control slide-in" style="animation-delay: 0.2s">
+                            <label for="telegramLink">Telegram</label>
+                            <input type="text" id="telegramLink" class="input" value="@Ennifer86">
+                        </div>
+                    </div>
+
+                    <!-- Нові поля для текстів -->
+                    <div class="section-title mb-6 slide-in mt-8" style="animation-delay: 0.6s">Тексти сайту</div>
+                    <div class="grid grid-cols-1 gap-6 slide-in" style="animation-delay: 0.7s">
+                        <div class="form-control">
+                            <label for="productsTitleUa">Заголовок розділу "Наші вироби" (UA)</label>
+                            <input type="text" id="productsTitleUa" class="input" value="Наші вироби">
+                        </div>
+                        <div class="form-control">
+                            <label for="productsTitleEn">Заголовок розділу "Наші вироби" (EN)</label>
+                            <input type="text" id="productsTitleEn" class="input" value="Our Products">
+                        </div>
+                        <div class="form-control">
+                            <label for="productsDescriptionUa">Опис розділу "Наші вироби" (UA)</label>
+                            <textarea id="productsDescriptionUa" class="textarea">Ознайомтеся з нашою колекцією унікальних ретро виробів ручної роботи</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="productsDescriptionEn">Опис розділу "Наші вироби" (EN)</label>
+                            <textarea id="productsDescriptionEn" class="textarea">Explore our collection of unique retro handmade crafts</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="contactsTitleUa">Заголовок розділу "Контакти" (UA)</label>
+                            <input type="text" id="contactsTitleUa" class="input" value="Контакти">
+                        </div>
+                        <div class="form-control">
+                            <label for="contactsTitleEn">Заголовок розділу "Контакти" (EN)</label>
+                            <input type="text" id="contactsTitleEn" class="input" value="Contacts">
+                        </div>
+                        <div class="form-control">
+                            <label for="contactsDescriptionUa">Опис розділу "Контакти" (UA)</label>
+                            <textarea id="contactsDescriptionUa" class="textarea">Готові до замовлення або хочете дізнатися більше? Зв'яжіться зі мною!</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="contactsDescriptionEn">Опис розділу "Контакти" (EN)</label>
+                            <textarea id="contactsDescriptionEn" class="textarea">Ready to order or want to know more? Contact me!</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="aboutTitleUa">Заголовок розділу "Про мене" (UA)</label>
+                            <input type="text" id="aboutTitleUa" class="input" value="Про мене">
+                        </div>
+                        <div class="form-control">
+                            <label for="aboutTitleEn">Заголовок розділу "Про мене" (EN)</label>
+                            <input type="text" id="aboutTitleEn" class="input" value="About Me">
+                        </div>
+                        <div class="form-control">
+                            <label for="aboutDescriptionUa">Опис розділу "Про мене" (UA)</label>
+                            <textarea id="aboutDescriptionUa" class="textarea">Мене звати Олена (Юлія), і я займаюся швейною справою вже 12 років. Моє захоплення ретро стилем почалося зі спадщини моєї бабусі — старовинної швейної машинки і колекції вишитих серветок. Кожен виріб, який я створюю, — це унікальна річ, зроблена вручну з любов'ю до деталей. Я використовую якісні натуральні тканини, старовинні вишивки та класичні фасони, які ніколи не виходять з моди. Моя мрія — повернути до життя красу ретро стилю і подарувати людям унікальні речі, які будуть радувати роками.</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="aboutDescriptionEn">Опис розділу "Про мене" (EN)</label>
+                            <textarea id="aboutDescriptionEn" class="textarea">My name is Olena (Yulia), and I have been in the sewing business for 12 years. My passion for retro style began with my grandmother's legacy - a vintage sewing machine and a collection of embroidered napkins. Each product I create is a unique handmade item made with love for details. I use quality natural fabrics, vintage embroidery, and classic styles that never go out of fashion. My dream is to bring the beauty of retro style back to life and give people unique items that will delight them for years to come.</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="heroTitleUa">Заголовок головної сторінки (UA)</label>
+                            <input type="text" id="heroTitleUa" class="input" value="Ретро швейні вироби">
+                        </div>
+                        <div class="form-control">
+                            <label for="heroTitleEn">Заголовок головної сторінки (EN)</label>
+                            <input type="text" id="heroTitleEn" class="input" value="Retro Sewing Crafts">
+                        </div>
+                        <div class="form-control">
+                            <label for="heroSubtitleUa">Підзаголовок головної сторінки (UA)</label>
+                            <input type="text" id="heroSubtitleUa" class="input" value="з душею">
+                        </div>
+                        <div class="form-control">
+                            <label for="heroSubtitleEn">Підзаголовок головної сторінки (EN)</label>
+                            <input type="text" id="heroSubtitleEn" class="input" value="with soul">
+                        </div>
+                        <div class="form-control">
+                            <label for="heroDescriptionUa">Опис головної сторінки (UA)</label>
+                            <textarea id="heroDescriptionUa" class="textarea">Кожен виріб — це унікальна річ, зроблена вручну з любов'ю до деталей. Ми використовуємо якісні натуральні тканини, старовинні вишивки та класичні фасони.</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="heroDescriptionEn">Опис головної сторінки (EN)</label>
+                            <textarea id="heroDescriptionEn" class="textarea">Each product is a unique handmade item created with love for details. We use quality natural fabrics, vintage embroidery, and classic styles.</textarea>
+                        </div>
+                        <div class="form-control">
+                            <label for="footerTextUa">Текст футера (UA)</label>
+                            <input type="text" id="footerTextUa" class="input" value="© 2024 Юлія. Усі права захищені. Створено з любов'ю.">
+                        </div>
+                        <div class="form-control">
+                            <label for="footerTextEn">Текст футера (EN)</label>
+                            <input type="text" id="footerTextEn" class="input" value="© 2024 Yulia. All rights reserved. Made with love.">
+                        </div>
+                        <div class="form-control">
+                            <label for="footerSiteNameUa">Назва сайту в футері (UA)</label>
+                            <input type="text" id="footerSiteNameUa" class="input" value="РетроШвейка">
+                        </div>
+                        <div class="form-control">
+                            <label for="footerSiteNameEn">Назва сайту в футері (EN)</label>
+                            <input type="text" id="footerSiteNameEn" class="input" value="RetroSewing">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Tab -->
+                <div class="tab-content p-4" id="productsTab">
+                    <div class="section-title mb-4">Додати новий товар</div>
+                    <div class="card p-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="form-control">
+                                    <label for="newProdNameUa">Назва товару (UA)</label>
+                                    <input type="text" id="newProdNameUa" class="input">
+                                </div>
+                                <div class="form-control">
+                                    <label for="newProdNameEn">Назва товару (EN)</label>
+                                    <input type="text" id="newProdNameEn" class="input">
+                                </div>
+                                <div class="form-control">
+                                    <label for="newProdPrice">Ціна (₴)</label>
+                                    <input type="number" id="newProdPrice" class="input">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-control">
+                                    <label for="newProdDescUa">Опис товару (UA)</label>
+                                    <textarea id="newProdDescUa" class="textarea" rows="3"></textarea>
+                                </div>
+                                <div class="form-control">
+                                    <label for="newProdDescEn">Опис товару (EN)</label>
+                                    <textarea id="newProdDescEn" class="textarea" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-control mt-4">
+                            <label>Зображення товару</label>
+                            <div class="upload-area" id="newProdImageUpload">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-primary-400 mb-2"></i>
+                                <p class="text-secondary-600">Перетягніть зображення сюди або натисніть для вибору</p>
+                                <input type="file" id="newProdImageInput" class="hidden" accept="image/*">
+                            </div>
+                            <img id="newProdImagePreview" src="https://placehold.co/300x300/e2e8f0/64748b?text=Завантажте+фото" alt="Попередній перегляд" class="image-preview mt-4">
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button id="addProductBtn" class="btn btn-primary">
+                                <i class="fas fa-plus mr-2"></i> Додати товар
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Existing Products -->
+                    <div class="section-title mb-4">Існуючі товари</div>
+                    <div class="mb-4 flex justify-between items-center">
+                        <div class="text-secondary-600"><span id="productsCount">0</span> товарів</div>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="productsSearch" class="input" placeholder="Пошук товарів..." style="width: 200px;">
+                        </div>
+                    </div>
+                    <div id="productsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                </div>
+
+                <!-- Design Tab -->
+                <div class="tab-content p-4" id="designTab">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card p-6">
+                            <div class="section-title mb-4">Загальні налаштування</div>
+                            <div class="form-control">
+                                <label for="fontSize">Розмір шрифту</label>
+                                <div class="flex items-center gap-4">
+                                    <input type="range" id="fontSize" min="80" max="150" value="100" class="w-full">
+                                    <span id="fontSizeValue" class="font-medium">100%</span>
+                                </div>
+                            </div>
+                            <div class="form-control">
+                                <label for="defaultLang">Мова за замовчуванням</label>
+                                <select id="defaultLang" class="input">
+                                    <option value="ua">Українська</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            <div class="form-control">
+                                <label for="headingFont">Шрифт заголовків</label>
+                                <select id="headingFont" class="input">
+                                    <option value="Playfair Display">Playfair Display</option>
+                                    <option value="Inter">Inter</option>
+                                </select>
+                            </div>
+                            <div class="form-control">
+                                <label for="bodyFont">Шрифт основного тексту</label>
+                                <select id="bodyFont" class="input">
+                                    <option value="Open Sans">Open Sans</option>
+                                    <option value="Inter">Inter</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card p-6">
+                            <div class="section-title mb-4">Колірна палітра</div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="color-option cursor-pointer p-4 rounded-lg border-2 border-primary-200 bg-primary-50 text-center" data-color="primary">
+                                    <div class="w-8 h-8 rounded-full bg-primary-500 mx-auto mb-2"></div>
+                                    <span class="text-sm font-medium">Основний</span>
+                                </div>
+                                <div class="color-option cursor-pointer p-4 rounded-lg border-2 border-secondary-200 bg-secondary-50 text-center" data-color="secondary">
+                                    <div class="w-8 h-8 rounded-full bg-secondary-500 mx-auto mb-2"></div>
+                                    <span class="text-sm font-medium">Допоміжний</span>
+                                </div>
+                                <div class="color-option cursor-pointer p-4 rounded-lg border-2 border-amber-200 bg-amber-50 text-center" data-color="accent">
+                                    <div class="w-8 h-8 rounded-full bg-amber-500 mx-auto mb-2"></div>
+                                    <span class="text-sm font-medium">Акцент</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6 mt-6">
+                        <div class="section-title mb-4">Зображення сайту</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block mb-2">Головне зображення</label>
+                                <div class="upload-area" id="heroImageUpload">
+                                    <i class="fas fa-cloud-upload-alt text-2xl text-primary-400 mb-1"></i>
+                                    <p class="text-xs text-secondary-600">Завантажити</p>
+                                    <input type="file" id="heroImageInput" class="hidden" accept="image/*">
+                                </div>
+                                <img id="heroImagePreview" src="https://placehold.co/500x600/fbbf24/ffffff?text=Ручні+вироби" alt="Головне зображення" class="image-preview mt-2">
+                            </div>
+                            <div>
+                                <label class="block mb-2">Про мене</label>
+                                <div class="upload-area" id="aboutImageUpload">
+                                    <i class="fas fa-cloud-upload-alt text-2xl text-primary-400 mb-1"></i>
+                                    <p class="text-xs text-secondary-600">Завантажити</p>
+                                    <input type="file" id="aboutImageInput" class="hidden" accept="image/*">
+                                </div>
+                                <img id="aboutImagePreview" src="https://placehold.co/600x700/f87171/ffffff?text=Майстриня" alt="Про мене" class="image-preview mt-2">
+                            </div>
+                            <!-- Блок зображення контактів прибрано за вимогою -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layout Tab -->
+                <div class="tab-content p-4" id="layoutTab">
+                    <div class="mb-6">
+                        <div class="section-title mb-3">Порядок розділів сайту</div>
+                        <p class="text-secondary-600">Перетягніть розділи, щоб змінити їх порядок на сайті</p>
+                    </div>
+                    <div id="layoutContainer" class="space-y-2"></div>
+
+                    <!-- Редагування розташування елементів у розділах -->
+                    <div class="mt-8">
+                        <div class="section-title mb-4">Розташування елементів у розділах</div>
+                        <p class="text-secondary-600 mb-6">Налаштуйте порядок елементів у кожному розділі сайту</p>
+
+                        <!-- Розділ "Головна сторінка" -->
+                        <div class="card p-4 mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-home text-primary-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-primary-700">Розділ "Головна сторінка"</h3>
+                            </div>
+                            <div id="homeElementsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Розділ "Про мене" -->
+                        <div class="card p-4 mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-user text-primary-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-primary-700">Розділ "Про мене"</h3>
+                            </div>
+                            <div id="aboutElementsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Розділ "Контакти" -->
+                        <div class="card p-4 mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-phone-alt text-primary-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-primary-700">Розділ "Контакти"</h3>
+                            </div>
+                            <div id="contactElementsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Розділ "Зворотній зв'язок" -->
+                        <div class="card p-4 mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-comments text-primary-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-primary-700">Розділ "Зворотній зв'язок"</h3>
+                            </div>
+                            <div id="feedbackElementsContainer" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Розділ "Футер" -->
+                        <div class="card p-4">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-bookmark text-primary-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-primary-700">Розділ "Футер"</h3>
+                            </div>
+                            <div id="footerElementsContainer" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="mb-8">
+                <div class="card p-5">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="text-lg font-semibold text-primary-700 mb-1">Готові зберегти зміни?</h3>
+                            <p class="text-secondary-600">Ваші зміни будуть миттєво відображені на сайті</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <div id="firebaseStatus" class="w-3 h-3 rounded-full bg-gray-400"></div>
+                                <span id="firebaseStatusText" class="text-sm text-secondary-500">Перевірка Firebase...</span>
+                        </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button id="saveBtn" class="btn btn-primary px-6 py-2.5 text-base">
+                            <i class="fas fa-save mr-2"></i> Зберегти зміни
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner mb-4"></div>
+            <p class="text-secondary-600 mb-4">Збереження змін...</p>
+            <button id="cancelLoadingBtn" class="btn btn-secondary">
+                <i class="fas fa-times mr-2"></i> Скасувати
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <span class="notification-message"></span>
+    </div>
+
+    <script>
+        // Firebase конфігурація
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2DjOu0WUzPBinysNFJgF_223NW9mh7Ts",
+            authDomain: "yulia-feb39.firebaseapp.com",
+            databaseURL: "https://yulia-feb39-default-rtdb.firebaseio.com/",
+            projectId: "yulia-feb39",
+            storageBucket: "yulia-feb39.firebasestorage.app",
+            messagingSenderId: "995206586230",
+            appId: "1:995206586230:web:457e6802fa6d622e106457",
+            measurementId: "G-RQT1XKLPD5"
+        };
+
+        // Ініціалізація Firebase
+        let db = null;
+        let firebaseInitialized = false;
+        let firebaseConnected = false; // реальний стан з'єднання з RTDB
+
+        // Функція для оновлення індикатора стану Firebase
+        function updateFirebaseStatus() {
+            const statusDot = document.getElementById('firebaseStatus');
+            const statusText = document.getElementById('firebaseStatusText');
+            
+            if (firebaseInitialized && db && firebaseConnected) {
+                statusDot.className = 'w-3 h-3 rounded-full bg-green-500';
+                statusText.textContent = 'Firebase підключено';
+                statusText.className = 'text-sm text-green-600';
+            } else {
+                statusDot.className = 'w-3 h-3 rounded-full bg-red-500';
+                statusText.textContent = 'Firebase не підключено';
+                statusText.className = 'text-sm text-red-600';
+            }
+        }
+
+        // Функція для очікування завантаження Firebase SDK
+        function waitForFirebaseSDK() {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const maxAttempts = 30; // Максимум 30 спроб (30 секунд)
+                
+                const checkSDK = () => {
+                    attempts++;
+                    console.log(`Перевірка Firebase SDK... Спроба ${attempts}/${maxAttempts}`);
+                    
+                    if (typeof firebase !== 'undefined' && firebase.app && firebase.database) {
+                        console.log('✅ Firebase SDK завантажено');
+                        resolve();
+                    } else if (attempts >= maxAttempts) {
+                        reject(new Error('Firebase SDK не завантажився протягом 30 секунд'));
+                    } else {
+                        setTimeout(checkSDK, 1000);
+                    }
+                };
+                
+                checkSDK();
+            });
+        }
+
+        // Слухач реального підключення до Firebase (.info/connected)
+        function setupConnectionListener() {
+            if (!db) return;
+            try {
+                const connectedRef = db.ref('.info/connected');
+                connectedRef.on('value', (snap) => {
+                    firebaseConnected = snap.val() === true;
+                    console.log('Статус .info/connected =', firebaseConnected);
+                    updateFirebaseStatus();
+                });
+            } catch (e) {
+                console.warn('Не вдалося встановити слухач .info/connected:', e);
+            }
+        }
+
+        // Функція для автоматичної перевірки підключення до Firebase
+        function checkFirebaseConnection() {
+            if (firebaseInitialized && db) {
+                const testRef = db.ref('connectionTest');
+                testRef.set({
+                    timestamp: Date.now(),
+                    message: 'Тест з\'єднання'
+                })
+                .then(() => {
+                    console.log('✅ Firebase з\'єднання працює');
+                    testRef.remove(); // Видаляємо тестові дані
+                    updateFirebaseStatus();
+                })
+                .catch(error => {
+                    console.warn('⚠️ Неможливо виконати тестовий запис (можливо правила). Перевіряємо лише статус .info/connected. Деталі:', error);
+                    // Не скидаємо стан ініціалізації, реальний статус оновлюється через .info/connected
+                    updateFirebaseStatus();
+                });
+            }
+        }
+
+                // Функція для ініціалізації Firebase
+        async function initializeFirebase() {
+            try {
+                console.log('Спроба ініціалізації Firebase...');
+                console.log('Firebase конфігурація:', firebaseConfig);
+                
+                // Очікуємо завантаження Firebase SDK
+                await waitForFirebaseSDK();
+                
+                // Перевіряємо, чи є мережеве з'єднання
+                if (!navigator.onLine) {
+                    throw new Error('Немає мережевого з\'єднання');
+                }
+                
+                // Перевіряємо версію Firebase
+                if (firebase.SDK_VERSION) {
+                    console.log('Firebase версія:', firebase.SDK_VERSION);
+                }
+                
+                // Спробуємо ініціалізувати Firebase
+        firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseInitialized = true;
+                console.log('Firebase успішно ініціалізовано');
+                console.log('База даних доступна:', !!db);
+                console.log('URL бази даних:', firebaseConfig.databaseURL);
+                
+                // Оновлюємо індикатор стану
+                updateFirebaseStatus();
+
+                // Встановлюємо слухач реального стану підключення
+                setupConnectionListener();
+                
+                // Автоматично перевіряємо з'єднання
+                setTimeout(() => {
+                    checkFirebaseConnection();
+                }, 1000);
+                
+                // Показуємо успішне повідомлення
+                setTimeout(() => {
+                    showNotification('Firebase успішно підключено!', 'success');
+                }, 500);
+                
+            } catch (error) {
+                console.error('Firebase не вдалося ініціалізувати:', error);
+                firebaseInitialized = false;
+                db = null;
+                
+                // Оновлюємо індикатор стану
+                updateFirebaseStatus();
+                
+                // Детальна обробка помилок ініціалізації
+                let errorMessage = 'Помилка Firebase';
+                if (error.code === 'app/duplicate-app') {
+                    errorMessage = 'Firebase вже ініціалізовано. Перезавантажте сторінку.';
+                } else if (error.code === 'app/invalid-app-options') {
+                    errorMessage = 'Неправильна конфігурація Firebase.';
+                } else if (error.message.includes('Firebase SDK не завантажено')) {
+                    errorMessage = 'Firebase SDK не завантажено. Перевірте підключення до інтернету.';
+                } else if (error.message.includes('Firebase модулі не завантажено повністю')) {
+                    errorMessage = 'Firebase модулі не завантажено повністю. Перезавантажте сторінку.';
+                } else if (error.message.includes('Firebase SDK не завантажився протягом 30 секунд')) {
+                    errorMessage = 'Firebase SDK не завантажився. Перезавантажте сторінку.';
+                } else if (error.message.includes('Немає мережевого з\'єднання')) {
+                    errorMessage = 'Немає мережевого з\'єднання. Перевірте підключення до інтернету.';
+                } else {
+                    errorMessage = `Помилка Firebase: ${error.message}`;
+                }
+                
+                // Показуємо помилку користувачу
+                setTimeout(() => {
+                    showNotification(errorMessage, 'error');
+                }, 1000);
+            }
+        }
+
+        // Запускаємо ініціалізацію Firebase з затримкою для завантаження SDK
+        setTimeout(() => {
+            initializeFirebase();
+        }, 1000);
+        
+        // Оновлюємо індикатор стану при завантаженні
+        setTimeout(() => {
+            updateFirebaseStatus();
+        }, 100);
+        
+        // Періодично перевіряємо підключення до Firebase (кожні 30 секунд)
+        setInterval(() => {
+            if (firebaseInitialized && db) {
+                checkFirebaseConnection();
+            }
+        }, 30000);
+        
+        // Обробник зміни стану мережі
+        window.addEventListener('online', () => {
+            console.log('Мережеве з\'єднання відновлено');
+            if (!firebaseInitialized) {
+                initializeFirebase();
+            } else {
+                // Перевіряємо підключення до Firebase
+                setTimeout(() => {
+                    checkFirebaseConnection();
+                }, 1000);
+            }
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('Мережеве з\'єднання втрачено');
+            firebaseInitialized = false;
+            db = null;
+            updateFirebaseStatus();
+            showNotification('Мережеве з\'єднання втрачено. Firebase недоступний.', 'warning');
+        });
+
+
+
+        // Глобальні змінні
+        let content = {
+            siteName: "РетроШвейка",
+            heroTitle: { ua: "Ретро швейні вироби", en: "Retro Sewing Crafts" },
+            heroSubtitle: { ua: "з душею", en: "with soul" },
+            heroDescription: { ua: "Кожен виріб — це унікальна річ, зроблена вручну з любов'ю до деталей. Ми використовуємо якісні натуральні тканини, старовинні вишивки та класичні фасони.", en: "Each product is a unique handmade item created with love for details. We use quality natural fabrics, vintage embroidery, and classic styles." },
+            productsTitle: { ua: "Наші вироби", en: "Our Products" },
+            productsDescription: { ua: "Ознайомтеся з нашою колекцією унікальних ретро виробів ручної роботи", en: "Explore our collection of unique retro handmade crafts" },
+            contactsTitle: { ua: "Контакти", en: "Contacts" },
+            contactsDescription: { ua: "Готові до замовлення або хочете дізнатися більше? Зв'яжіться зі мною!", en: "Ready to order or want to know more? Contact me!" },
+            aboutTitle: { ua: "Про мене", en: "About Me" },
+            aboutDescription: { ua: "Мене звати Олена (Юлія), і я займаюся швейною справою вже 12 років. Моє захоплення ретро стилем почалося зі спадщини моєї бабусі — старовинної швейної машинки і колекції вишитих серветок. Кожен виріб, який я створюю, — це унікальна річ, зроблена вручну з любов'ю до деталей. Я використовую якісні натуральні тканини, старовинні вишивки та класичні фасони, які ніколи не виходять з моди. Моя мрія — повернути до життя красу ретро стилю і подарувати людям унікальні речі, які будуть радувати роками.", en: "My name is Olena (Yulia), and I have been in the sewing business for 12 years. My passion for retro style began with my grandmother's legacy - a vintage sewing machine and a collection of embroidered napkins. Each product I create is a unique handmade item made with love for details. I use quality natural fabrics, vintage embroidery, and classic styles that never go out of fashion. My dream is to bring the beauty of retro style back to life and give people unique items that will delight them for years to come." },
+            footerText: { ua: "© 2024 Юлія. Усі права захищені. Створено з любов'ю.", en: "© 2024 Yulia. All rights reserved. Made with love." },
+            footerSiteName: { ua: "РетроШвейка", en: "RetroSewing" }
+        };
+
+        let design = {
+            fontSize: 100,
+            defaultLang: 'ua',
+            headingFont: 'Playfair Display',
+            bodyFont: 'Open Sans',
+            colors: {
+                primary: '#0284c7',
+                secondary: '#475569',
+                accent: '#f59e0b'
+            }
+        };
+
+        let products = [
+            {
+                id: "1",
+                name: { ua: "Ретро сукня", en: "Retro Dress" },
+                desc: { ua: "Прекрасна сукня в ретро стилі, вишита вручну.", en: "Beautiful retro dress, hand-embroidered." },
+                price: "1200",
+                img: "https://placehold.co/300x300/fde68a/92400e?text=Ретро+сукня"
+            },
+            {
+                id: "2",
+                name: { ua: "Вишита блузка", en: "Embroidered Blouse" },
+                desc: { ua: "Блузка з тонкого полотна, прикрашена вишивкою.", en: "Blouse made of fine fabric, decorated with embroidery." },
+                price: "800",
+                img: "https://placehold.co/300x300/fde68a/92400e?text=Вишита+блузка"
+            },
+            {
+                id: "3",
+                name: { ua: "Серветки ручної роботи", en: "Handmade Napkins" },
+                desc: { ua: "Набір серветок, вишитих вручну.", en: "Set of handmade embroidered napkins." },
+                price: "300",
+                img: "https://placehold.co/300x300/fde68a/92400e?text=Серветки"
+            }
+        ];
+
+        let layout = ['home', 'products', 'about', 'contact', 'feedback', 'footer'];
+        let images = {
+            heroImage: "https://placehold.co/500x600/fbbf24/ffffff?text=Ручні+вироби",
+            aboutImage: "https://placehold.co/600x700/f87171/ffffff?text=Майстриня"
+        };
+
+        let feedback = {
+            telegram: "@Ennifer86",
+            email: "yulia.retro@gmail.com",
+            phone: "+38 (098) 765-43-21"
+        };
+
+        let elementLayouts = {
+            home: ['heroTitle', 'heroSubtitle', 'heroDescription', 'heroButtons', 'heroStats', 'heroImage'],
+            about: ['aboutImage', 'aboutTitle', 'aboutDescription'],
+            contact: ['contactInfo'],
+            feedback: ['feedbackTitle', 'feedbackDescription', 'feedbackForm', 'feedbackContacts'],
+            footer: ['footerText']
+        };
+
+        // Функції
+        function showLoading(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (show) {
+                loadingOverlay.style.display = 'flex';
+                // Автоматично приховуємо завантаження через 15 секунд для захисту
+                setTimeout(() => {
+                    if (loadingOverlay.style.display === 'flex') {
+                        loadingOverlay.style.display = 'none';
+                        console.warn('Завантаження автоматично приховано через таймаут');
+                        showNotification('Завантаження автоматично припинено через таймаут', 'warning');
+                        
+                        // Скидаємо стан кнопки збереження, якщо вона була заблокована
+                        const saveBtn = document.getElementById('saveBtn');
+                        if (saveBtn && saveBtn.disabled) {
+                            saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Зберегти зміни';
+                            saveBtn.disabled = false;
+                        }
+                    }
+                }, 15000);
+            } else {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.querySelector('.notification-message').textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function setupTabSwitching() {
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    const tabId = item.getAttribute('data-tab') + 'Tab';
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        function setupImageUploads() {
+            const imageUploads = [
+                { input: 'newProdImageInput', preview: 'newProdImagePreview' },
+                { input: 'heroImageInput', preview: 'heroImagePreview' },
+                { input: 'aboutImageInput', preview: 'aboutImagePreview' }
+            ];
+
+            imageUploads.forEach(upload => {
+                const input = document.getElementById(upload.input);
+                const preview = document.getElementById(upload.preview);
+                
+                if (input && preview) {
+                    input.addEventListener('change', function(e) {
+                        if (e.target.files && e.target.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(ev) {
+                                preview.src = ev.target.result;
+                            };
+                            reader.readAsDataURL(e.target.files[0]);
+                        }
+                    });
+                }
+            });
+
+            document.querySelectorAll('.upload-area').forEach(area => {
+                area.addEventListener('click', () => {
+                    const input = area.querySelector('input[type="file"]');
+                    if (input) input.click();
+                });
+            });
+        }
+
+        function setupAddProduct() {
+            document.getElementById('addProductBtn').addEventListener('click', () => {
+                const nameUa = document.getElementById('newProdNameUa').value.trim();
+                const nameEn = document.getElementById('newProdNameEn').value.trim();
+                const price = document.getElementById('newProdPrice').value.trim();
+                const descUa = document.getElementById('newProdDescUa').value.trim();
+                const descEn = document.getElementById('newProdDescEn').value.trim();
+                const img = document.getElementById('newProdImagePreview').src;
+
+                if (!nameUa || !nameEn || !price || !descUa || !descEn) {
+                    showNotification('Будь ласка, заповніть усі поля', 'warning');
+                    return;
+                }
+
+                const product = {
+                    id: Date.now().toString(),
+                    name: { ua: nameUa, en: nameEn },
+                    desc: { ua: descUa, en: descEn },
+                    price,
+                    img
+                };
+
+                products.push(product);
+
+                // Очищення форми
+                document.getElementById('newProdNameUa').value = '';
+                document.getElementById('newProdNameEn').value = '';
+                document.getElementById('newProdPrice').value = '';
+                document.getElementById('newProdDescUa').value = '';
+                document.getElementById('newProdDescEn').value = '';
+                document.getElementById('newProdImagePreview').src = 'https://placehold.co/300x300/e2e8f0/64748b?text=Завантажте+фото';
+
+                renderProductsList();
+                showNotification('Товар додано успішно');
+            });
+        }
+
+        function setupProductSearch() {
+            const searchInput = document.getElementById('productsSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredProducts = products.filter(product => 
+                        product.name.ua.toLowerCase().includes(searchTerm) ||
+                        product.name.en.toLowerCase().includes(searchTerm) ||
+                        product.desc.ua.toLowerCase().includes(searchTerm) ||
+                        product.desc.en.toLowerCase().includes(searchTerm)
+                    );
+                    renderProductsList(filteredProducts);
+                });
+            }
+        }
+
+        function renderProductsList(productsToRender = products) {
+            const container = document.getElementById('productsList');
+            const productsCount = document.getElementById('productsCount');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (productsToRender.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 bg-secondary-50 rounded-xl">
+                    <div class="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-box-open text-secondary-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-secondary-700 mb-2">Товари не знайдено</h3>
+                    <p class="text-secondary-500">Спробуйте змінити пошуковий запит</p>
+                </div>`;
+                productsCount.textContent = '0';
+                return;
+            }
+
+            productsCount.textContent = productsToRender.length;
+            
+            productsToRender.forEach((prod, index) => {
+                const name = prod.name.ua;
+                const desc = prod.desc.ua;
+                const price = prod.price;
+                const img = prod.img;
+
+                const card = document.createElement('div');
+                card.className = 'product-card-admin scale-in';
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.innerHTML = `
+                    <img src="${img}" alt="${name}" class="product-img-admin">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-base text-primary-800">${name}</h4>
+                            <div class="flex space-x-1">
+                                <button onclick="editProduct(${products.indexOf(prod)})" class="btn-icon btn-secondary text-sm" title="Редагувати">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteProduct(${products.indexOf(prod)})" class="btn-icon btn-danger text-sm" title="Видалити">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-primary-600 font-semibold mb-2">${price} ₴</div>
+                        <p class="text-secondary-600 text-sm line-clamp-2">${desc}</p>
+                        <div class="mt-3 flex flex-wrap">
+                            <span class="product-tag bg-primary-50 text-primary-700">Новинка</span>
+                            <span class="product-tag bg-emerald-50 text-emerald-700">У наявності</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderProductsList() {
+            const container = document.getElementById('productsList');
+            const productsCount = document.getElementById('productsCount');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (products.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 bg-secondary-50 rounded-xl">
+                    <div class="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-box-open text-secondary-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-secondary-700 mb-2">Товари відсутні</h3>
+                    <p class="text-secondary-500">Додайте перший товар, щоб почати</p>
+                </div>`;
+                productsCount.textContent = '0';
+                return;
+            }
+
+            productsCount.textContent = products.length;
+            
+            products.forEach((prod, index) => {
+                    const name = prod.name.ua;
+                    const desc = prod.desc.ua;
+                    const price = prod.price;
+                    const img = prod.img;
+
+                    const card = document.createElement('div');
+                    card.className = 'product-card-admin scale-in';
+                    card.style.animationDelay = (index * 0.1) + 's';
+                    card.innerHTML = `
+                        <img src="${img}" alt="${name}" class="product-img-admin">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-base text-primary-800">${name}</h4>
+                                <div class="flex space-x-1">
+                                    <button onclick="editProduct(${index})" class="btn-icon btn-secondary text-sm" title="Редагувати">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteProduct(${index})" class="btn-icon btn-danger text-sm" title="Видалити">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-primary-600 font-semibold mb-2">${price} ₴</div>
+                            <p class="text-secondary-600 text-sm line-clamp-2">${desc}</p>
+                            <div class="mt-3 flex flex-wrap">
+                                <span class="product-tag bg-primary-50 text-primary-700">Новинка</span>
+                                <span class="product-tag bg-emerald-50 text-emerald-700">У наявності</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+            });
+        }
+
+        window.editProduct = function(index) {
+            const prod = products[index];
+            document.getElementById('newProdNameUa').value = prod.name.ua;
+            document.getElementById('newProdNameEn').value = prod.name.en;
+            document.getElementById('newProdPrice').value = prod.price;
+            document.getElementById('newProdDescUa').value = prod.desc.ua;
+            document.getElementById('newProdDescEn').value = prod.desc.en;
+            document.getElementById('newProdImagePreview').src = prod.img;
+            
+            // Прокрутити до форми
+            document.querySelector('#productsTab').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.deleteProduct = function(index) {
+            if (confirm('Ви дійсно бажаєте видалити цей товар? Цю дію неможливо скасувати.')) {
+                products.splice(index, 1);
+                renderProductsList();
+                showNotification('Товар успішно видалено');
+            }
+        };
+
+        function setupFontSize() {
+            document.getElementById('fontSize').addEventListener('input', () => {
+                const value = document.getElementById('fontSize').value;
+                document.getElementById('fontSizeValue').textContent = value + '%';
+            });
+        }
+
+        function setupColorSelection() {
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('border-2', 'border-primary-500'));
+                    option.classList.add('border-2', 'border-primary-500');
+                });
+            });
+        }
+
+        function setupSaveFunctionality() {
+            let isSaving = false; // Захист від повторних натискань
+            
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                if (isSaving) {
+                    showNotification('Збереження вже виконується. Зачекайте...', 'warning');
+                    return;
+                }
+                
+                // Перевіряємо стан Firebase перед збереженням
+                console.log('Перевірка стану Firebase перед збереженням:', {
+                    firebaseInitialized,
+                    db: !!db,
+                    firebase: !!firebase
+                });
+                
+                if (!firebaseInitialized || !db) {
+                    showNotification('Firebase не ініціалізовано. Спробуйте кнопку "Перепідключити" або перезавантажте сторінку.', 'error');
+                    return;
+                }
+                
+                isSaving = true;
+                const saveBtn = document.getElementById('saveBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Збереження...';
+                saveBtn.disabled = true;
+                
+                showLoading(true);
+                
+                // Збір даних з форм
+                const updatedContent = {
+                    siteName: document.getElementById('siteName').value,
+                    heroTitle: {
+                        ua: document.getElementById('heroTitleUa').value,
+                        en: document.getElementById('heroTitleEn').value
+                    },
+                    heroSubtitle: {
+                        ua: document.getElementById('heroSubtitleUa').value,
+                        en: document.getElementById('heroSubtitleEn').value
+                    },
+                    heroDescription: {
+                        ua: document.getElementById('heroDescriptionUa').value,
+                        en: document.getElementById('heroDescriptionEn').value
+                    },
+                    productsTitle: {
+                        ua: document.getElementById('productsTitleUa').value,
+                        en: document.getElementById('productsTitleEn').value
+                    },
+                    productsDescription: {
+                        ua: document.getElementById('productsDescriptionUa').value,
+                        en: document.getElementById('productsDescriptionEn').value
+                    },
+                    contactsTitle: {
+                        ua: document.getElementById('contactsTitleUa').value,
+                        en: document.getElementById('contactsTitleEn').value
+                    },
+                    contactsDescription: {
+                        ua: document.getElementById('contactsDescriptionUa').value,
+                        en: document.getElementById('contactsDescriptionEn').value
+                    },
+                    aboutTitle: {
+                        ua: document.getElementById('aboutTitleUa').value,
+                        en: document.getElementById('aboutTitleEn').value
+                    },
+                    aboutDescription: {
+                        ua: document.getElementById('aboutDescriptionUa').value,
+                        en: document.getElementById('aboutDescriptionEn').value
+                    },
+                    footerText: {
+                        ua: document.getElementById('footerTextUa').value,
+                        en: document.getElementById('footerTextEn').value
+                    },
+                    footerSiteName: {
+                        ua: document.getElementById('footerSiteNameUa').value,
+                        en: document.getElementById('footerSiteNameEn').value
+                    }
+                };
+
+                const updatedDesign = {
+                    fontSize: parseInt(document.getElementById('fontSize').value),
+                    defaultLang: document.getElementById('defaultLang').value,
+                    headingFont: document.getElementById('headingFont').value,
+                    bodyFont: document.getElementById('bodyFont').value,
+                    colors: design.colors // Зберігаємо існуючі кольори
+                };
+
+                const updatedFeedback = {
+                    telegram: document.getElementById('telegramLink').value,
+                    email: feedback.email,
+                    phone: feedback.phone
+                };
+
+                const updatedImages = {
+                    heroImage: document.getElementById('heroImagePreview').src,
+                    aboutImage: document.getElementById('aboutImagePreview').src,
+                    contactImage: document.getElementById('contactImagePreview').src
+                };
+
+                // Оновлення порядку розділів
+                const updatedLayout = Array.from(document.getElementById('layoutContainer').children)
+                    .map(item => item.dataset.section);
+
+                // Оновлення порядку елементів у розділах
+                const updatedElementLayouts = {
+                    home: Array.from(document.getElementById('homeElementsContainer').children)
+                        .map(item => item.dataset.element),
+                    about: Array.from(document.getElementById('aboutElementsContainer').children)
+                        .map(item => item.dataset.element),
+                    contact: Array.from(document.getElementById('contactElementsContainer').children)
+                        .map(item => item.dataset.element),
+                    feedback: Array.from(document.getElementById('feedbackElementsContainer').children)
+                        .map(item => item.dataset.element),
+                    footer: Array.from(document.getElementById('footerElementsContainer').children)
+                        .map(item => item.dataset.element)
+                };
+
+                // Підготовка даних для збереження
+                const siteData = {
+                    content: updatedContent,
+                    products: products,
+                    design: updatedDesign,
+                    layout: updatedLayout,
+                    elementLayouts: updatedElementLayouts,
+                    images: updatedImages,
+                    feedback: updatedFeedback
+                };
+
+                // Спробувати зберегти в Firebase, якщо доступний
+                if (firebaseInitialized && db) {
+                    console.log('Починаю збереження в Firebase...');
+                    const siteDataRef = db.ref('siteData');
+                    
+                    // Додаємо детальне логування
+                    console.log('Дані для збереження:', siteData);
+                    console.log('URL бази даних:', firebaseConfig.databaseURL);
+                    
+                    // Спробуємо зберегти напряму без перевірки з'єднання
+                    console.log('Спроба збереження даних...');
+                    const savePromise = siteDataRef.set(siteData);
+
+                    // Таймаут для захисту від нескінченного завантаження
+                    const timeoutPromise = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('Таймаут збереження (10 секунд)')), 10000);
+                    });
+
+                    Promise.race([savePromise, timeoutPromise])
+                        .then(() => {
+                            console.log('Дані успішно збережено в Firebase!');
+                    showLoading(false);
+                            showNotification('Усі зміни успішно збережено в Firebase!');
+                        })
+                        .catch(error => {
+                            console.error("Помилка при збереженні в Firebase:", error);
+                    showLoading(false);
+                            
+                            // Детальна обробка помилок
+                            let errorMessage = 'Помилка при збереженні';
+                            if (error.code === 'PERMISSION_DENIED') {
+                                errorMessage = 'Доступ заборонено. Перевірте правила безпеки Firebase.';
+                            } else if (error.code === 'UNAVAILABLE') {
+                                errorMessage = 'Firebase недоступний. Перевірте мережеве з\'єднання.';
+                            } else if (error.message.includes('Таймаут')) {
+                                errorMessage = 'Таймаут збереження. Спробуйте ще раз.';
+                            } else {
+                                errorMessage = `Помилка: ${error.message}`;
+                            }
+                            
+                            showNotification(errorMessage, 'error');
+                        })
+                        .finally(() => {
+                            console.log('Завершення процесу збереження...');
+                            // Відновлюємо стан кнопки
+                            isSaving = false;
+                            saveBtn.innerHTML = originalText;
+                            saveBtn.disabled = false;
+                            
+                            // Додатковий захист - перевіряємо, чи завантаження все ще активно
+                            setTimeout(() => {
+                                if (document.getElementById('loadingOverlay').style.display === 'flex') {
+                                    console.warn('Примусово приховуємо завантаження');
+                                    showLoading(false);
+                                }
+                            }, 1000);
+                        });
+                } else {
+                    // Firebase недоступний
+                    console.error('Firebase недоступний. Стан:', { firebaseInitialized, db: !!db });
+                    showLoading(false);
+                    showNotification('Firebase недоступний. Перевірте підключення та спробуйте ще раз.', 'error');
+                    // Відновлюємо стан кнопки
+                    isSaving = false;
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                }
+            });
+
+            // Налаштування кнопки скасування завантаження
+            document.getElementById('cancelLoadingBtn').addEventListener('click', () => {
+                showLoading(false);
+                isSaving = false; // Скидаємо стан збереження
+                const saveBtn = document.getElementById('saveBtn');
+                saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Зберегти зміни';
+                saveBtn.disabled = false;
+                showNotification('Збереження скасовано користувачем', 'warning');
+            });
+
+
+        }
+
+
+
+
+
+        function setupPreviewSite() {
+            document.querySelectorAll('#previewSiteBtn, #previewSiteBtnBottom').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+            });
+        }
+
+        function loadData() {
+            showLoading(true);
+            console.log("Починаю завантаження даних...");
+            
+            let data = null;
+            
+            // Спробувати завантажити з Firebase, якщо доступний
+            if (firebaseInitialized && db) {
+            const siteDataRef = db.ref('siteData');
+                
+                // Таймаут для завантаження даних
+                const loadPromise = siteDataRef.once('value');
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Таймаут завантаження')), 10000);
+                });
+
+                Promise.race([loadPromise, timeoutPromise])
+                .then((snapshot) => {
+                        data = snapshot.val();
+                    console.log("Дані отримано з Firebase:", data);
+                        
+
+                        
+                        processLoadedData(data);
+                    })
+                    .catch((error) => {
+                        console.error("Помилка при завантаженні з Firebase:", error);
+                        showNotification('Помилка при завантаженні з Firebase. Використовуються значення за замовчуванням.', 'error');
+                        processLoadedData(null);
+                    })
+                    .finally(() => {
+                        showLoading(false);
+                        
+                        // Додатковий захист - перевіряємо, чи завантаження все ще активно
+                        setTimeout(() => {
+                            if (document.getElementById('loadingOverlay').style.display === 'flex') {
+                                showLoading(false);
+                            }
+                        }, 1000);
+                    });
+
+                // Слухач для реального часу
+                siteDataRef.on('value', (snapshot) => {
+                    const realtimeData = snapshot.val();
+                    if (realtimeData) {
+                        content = realtimeData.content || content;
+                        products = realtimeData.products || products;
+                        design = realtimeData.design || design;
+                        layout = realtimeData.layout || layout;
+                        images = realtimeData.images || images;
+                        feedback = realtimeData.feedback || feedback;
+                        elementLayouts = realtimeData.elementLayouts || elementLayouts;
+
+                        document.getElementById('heroImagePreview').src = images.heroImage;
+                        document.getElementById('aboutImagePreview').src = images.aboutImage;
+
+                        updateLayoutPreview();
+                        updateElementLayouts();
+                        renderProductsList();
+                    }
+                });
+            } else {
+                // Firebase недоступний
+                console.log("Firebase недоступний. Використовуються значення за замовчуванням");
+                showNotification('Firebase недоступний. Використовуються значення за замовчуванням.', 'warning');
+                processLoadedData(null);
+                showLoading(false);
+            }
+        }
+
+        function processLoadedData(data) {
+                    if (data) {
+                        // Content
+                        if (data.content) {
+                            content = data.content;
+                            document.getElementById('siteName').value = content.siteName;
+                            
+                            if (content.heroTitle) {
+                                document.getElementById('heroTitleUa').value = content.heroTitle.ua;
+                                document.getElementById('heroTitleEn').value = content.heroTitle.en;
+                            }
+                            if (content.heroSubtitle) {
+                                document.getElementById('heroSubtitleUa').value = content.heroSubtitle.ua;
+                                document.getElementById('heroSubtitleEn').value = content.heroSubtitle.en;
+                            }
+                            if (content.heroDescription) {
+                                document.getElementById('heroDescriptionUa').value = content.heroDescription.ua;
+                                document.getElementById('heroDescriptionEn').value = content.heroDescription.en;
+                            }
+                            if (content.productsTitle) {
+                                document.getElementById('productsTitleUa').value = content.productsTitle.ua;
+                                document.getElementById('productsTitleEn').value = content.productsTitle.en;
+                            }
+                            if (content.productsDescription) {
+                                document.getElementById('productsDescriptionUa').value = content.productsDescription.ua;
+                                document.getElementById('productsDescriptionEn').value = content.productsDescription.en;
+                            }
+                            if (content.contactsTitle) {
+                                document.getElementById('contactsTitleUa').value = content.contactsTitle.ua;
+                                document.getElementById('contactsTitleEn').value = content.contactsTitle.en;
+                            }
+                            if (content.contactsDescription) {
+                                document.getElementById('contactsDescriptionUa').value = content.contactsDescription.ua;
+                                document.getElementById('contactsDescriptionEn').value = content.contactsDescription.en;
+                            }
+                            if (content.aboutTitle) {
+                                document.getElementById('aboutTitleUa').value = content.aboutTitle.ua;
+                                document.getElementById('aboutTitleEn').value = content.aboutTitle.en;
+                            }
+                            if (content.aboutDescription) {
+                                document.getElementById('aboutDescriptionUa').value = content.aboutDescription.ua;
+                                document.getElementById('aboutDescriptionEn').value = content.aboutDescription.en;
+                            }
+                            if (content.footerText) {
+                                document.getElementById('footerTextUa').value = content.footerText.ua;
+                                document.getElementById('footerTextEn').value = content.footerText.en;
+                            }
+                            if (content.footerSiteName) {
+                                document.getElementById('footerSiteNameUa').value = content.footerSiteName.ua;
+                                document.getElementById('footerSiteNameEn').value = content.footerSiteName.en;
+                            }
+                        }
+
+                        // Feedback
+                        if (data.feedback) {
+                            feedback = data.feedback;
+                            document.getElementById('telegramLink').value = feedback.telegram;
+                        }
+
+                        // Images
+                        if (data.images) {
+                            images = data.images;
+                            document.getElementById('heroImagePreview').src = images.heroImage;
+                            document.getElementById('aboutImagePreview').src = images.aboutImage;
+                        }
+
+                        // Products
+                        if (data.products) {
+                            products = data.products;
+                            renderProductsList();
+                        }
+
+                        // Design
+                        if (data.design) {
+                            design = data.design;
+                            document.getElementById('fontSize').value = design.fontSize;
+                            document.getElementById('fontSizeValue').textContent = design.fontSize + '%';
+                            document.getElementById('defaultLang').value = design.defaultLang;
+                            document.getElementById('headingFont').value = design.headingFont;
+                            document.getElementById('bodyFont').value = design.bodyFont;
+                        }
+
+                        // Layout
+                        if (data.layout) {
+                            layout = data.layout;
+                            updateLayoutPreview();
+                        }
+
+                        // Element Layouts
+                        if (data.elementLayouts) {
+                            elementLayouts = data.elementLayouts;
+                            updateElementLayouts();
+                        }
+                    }
+        }
+
+        function updateLayoutPreview() {
+            const container = document.getElementById('layoutContainer');
+            container.innerHTML = '';
+            
+            layout.forEach((section, index) => {
+                const div = document.createElement('div');
+                div.className = 'sortable';
+                div.dataset.section = section;
+                div.draggable = true;
+                
+                const sectionNames = {
+                    home: '🏠 Головна сторінка',
+                    products: '🛍️ Товари',
+                    about: '👩‍🔧 Про мене',
+                    contact: '📞 Контакти',
+                    feedback: '💬 Зворотній зв\'язок',
+                    footer: '🔖 Футер'
+                };
+                
+                const sectionDescriptions = {
+                    home: 'Головний розділ сайту з вітанням',
+                    products: 'Список ваших товарів',
+                    about: 'Інформація про вас та вашу роботу',
+                    contact: 'Контактна інформація та форма зв\'язку',
+                    feedback: 'Форма зворотного зв\'язку',
+                    footer: 'Нижній колонтитул з контактами'
+                };
+                
+                div.innerHTML = `
+                    <div class="drag-handle">
+                        <i class="fas fa-grip-lines"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">${sectionNames[section]}</div>
+                        <div class="text-secondary-500 text-sm">${sectionDescriptions[section]}</div>
+                    </div>
+                    <div class="flex items-center gap-2 ml-2">
+                        <span class="badge badge-primary">${index + 1}</span>
+                        <button class="btn-icon btn-secondary move-section-up" title="Підняти вгору">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="btn-icon btn-secondary move-section-down" title="Опустити вниз">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            addDragEvents();
+        }
+
+        function updateElementLayouts() {
+            // Оновлення розташування елементів у розділі "Головна"
+            const homeContainer = document.getElementById('homeElementsContainer');
+            homeContainer.innerHTML = '';
+            (elementLayouts.home || []).forEach((element, index) => {
+                const div = createElementLayoutItem(element, 'home');
+                homeContainer.appendChild(div);
+            });
+
+            // Оновлення розташування елементів у розділі "Про мене"
+            const aboutContainer = document.getElementById('aboutElementsContainer');
+            aboutContainer.innerHTML = '';
+            (elementLayouts.about || []).forEach((element, index) => {
+                const div = createElementLayoutItem(element, 'about');
+                aboutContainer.appendChild(div);
+            });
+
+            // Оновлення розташування елементів у розділі "Контакти"
+            const contactContainer = document.getElementById('contactElementsContainer');
+            contactContainer.innerHTML = '';
+            (elementLayouts.contact || []).forEach((element, index) => {
+                const div = createElementLayoutItem(element, 'contact');
+                contactContainer.appendChild(div);
+            });
+
+            // Оновлення розташування елементів у розділі "Зворотній зв'язок"
+            const feedbackContainer = document.getElementById('feedbackElementsContainer');
+            feedbackContainer.innerHTML = '';
+            (elementLayouts.feedback || []).forEach((element, index) => {
+                const div = createElementLayoutItem(element, 'feedback');
+                feedbackContainer.appendChild(div);
+            });
+
+            // Оновлення розташування елементів у розділі "Футер"
+            const footerContainer = document.getElementById('footerElementsContainer');
+            footerContainer.innerHTML = '';
+            (elementLayouts.footer || []).forEach((element, index) => {
+                const div = createElementLayoutItem(element, 'footer');
+                footerContainer.appendChild(div);
+            });
+            
+            addElementDragEvents();
+        }
+
+        function createElementLayoutItem(element, section) {
+            const div = document.createElement('div');
+            div.className = 'element-layout-item';
+            div.dataset.element = element;
+            div.dataset.section = section;
+            div.draggable = true;
+            
+            const elementNames = {
+                heroTitle: 'Заголовок головної сторінки',
+                heroSubtitle: 'Підзаголовок головної сторінки',
+                heroDescription: 'Опис головної сторінки',
+                heroButtons: 'Кнопки дій',
+                heroStats: 'Статистика',
+                heroImage: 'Головне зображення',
+                aboutImage: 'Фото про мене',
+                aboutTitle: 'Заголовок "Про мене"',
+                aboutDescription: 'Опис "Про мене"',
+                contactInfo: 'Контактна інформація',
+                contactImage: 'Фото контактів',
+                feedbackTitle: 'Заголовок зворотного зв\'язку',
+                feedbackDescription: 'Опис зворотного зв\'язку',
+                feedbackForm: 'Форма зворотного зв\'язку',
+                feedbackContacts: 'Контакти зворотного зв\'язку',
+                footerText: 'Текст футера'
+            };
+            
+            const elementIcons = {
+                heroTitle: 'fas fa-heading',
+                heroSubtitle: 'fas fa-subscript',
+                heroDescription: 'fas fa-align-left',
+                heroButtons: 'fas fa-mouse-pointer',
+                heroStats: 'fas fa-chart-bar',
+                heroImage: 'fas fa-image',
+                aboutImage: 'fas fa-image',
+                aboutTitle: 'fas fa-heading',
+                aboutDescription: 'fas fa-align-left',
+                contactInfo: 'fas fa-info-circle',
+                contactImage: 'fas fa-image',
+                feedbackTitle: 'fas fa-heading',
+                feedbackDescription: 'fas fa-align-left',
+                feedbackForm: 'fas fa-file-alt',
+                feedbackContacts: 'fas fa-address-book',
+                footerText: 'fas fa-align-center'
+            };
+            
+            const elementDescriptions = {
+                heroTitle: 'Основний заголовок сайту',
+                heroSubtitle: 'Другорядний заголовок сайту',
+                heroDescription: 'Основний опис сайту',
+                heroButtons: 'Кнопки "Переглянути товари" та "Контакти"',
+                heroStats: 'Блок зі статистикою (роки досвіду, клієнти, вироби)',
+                heroImage: 'Основне зображення на головній сторінці',
+                aboutImage: 'Зображення майстрині',
+                aboutTitle: 'Основний заголовок розділу',
+                aboutDescription: 'Основний текст розділу',
+                contactInfo: 'Блок з контактами (Telegram, Email, Телефон)',
+                contactImage: 'Зображення в розділі контактів',
+                feedbackTitle: 'Основний заголовок розділу',
+                feedbackDescription: 'Основний текст розділу',
+                feedbackForm: 'Форма зворотного зв\'язку',
+                feedbackContacts: 'Контактна інформація для зворотного зв\'язку',
+                footerText: 'Основний текст у нижньому колонтитулі'
+            };
+            
+            div.innerHTML = `
+                <div class="drag-handle">
+                    <i class="fas fa-grip-lines"></i>
+                </div>
+                <div class="element-layout-item-header">
+                    <div class="element-layout-item-icon">
+                        <i class="${elementIcons[element]}"></i>
+                    </div>
+                    <div>
+                        <div class="element-layout-item-title">${elementNames[element]}</div>
+                        <div class="element-layout-item-description">${elementDescriptions[element]}</div>
+                    </div>
+                    <div class="element-controls">
+                        <button class="btn-icon btn-secondary move-up" title="Підняти вгору">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="btn-icon btn-secondary move-down" title="Опустити вниз">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function addDragEvents() {
+            const container = document.getElementById('layoutContainer');
+            
+            container.addEventListener('dragstart', e => {
+                e.target.classList.add('dragging');
+            });
+            
+            container.addEventListener('dragend', e => {
+                e.target.classList.remove('dragging');
+            });
+            
+            container.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(container, e.clientY);
+                const draggable = document.querySelector('.dragging');
+                if (afterElement == null) {
+                    container.appendChild(draggable);
+                } else {
+                    container.insertBefore(draggable, afterElement);
+                }
+            });
+
+            // Додаємо обробники для кнопок переміщення розділів
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.move-section-up')) {
+                    const item = e.target.closest('.sortable');
+                    moveSectionUp(item);
+                } else if (e.target.closest('.move-section-down')) {
+                    const item = e.target.closest('.sortable');
+                    moveSectionDown(item);
+                }
+            });
+        }
+
+        function moveSectionUp(item) {
+            const container = item.parentElement;
+            const prevItem = item.previousElementSibling;
+            if (prevItem) {
+                container.insertBefore(item, prevItem);
+            }
+        }
+
+        function moveSectionDown(item) {
+            const container = item.parentElement;
+            const nextItem = item.nextElementSibling;
+            if (nextItem) {
+                container.insertBefore(nextItem, item);
+            }
+        }
+
+        function addElementDragEvents() {
+            document.querySelectorAll('.element-layout-item').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.target.classList.add('dragging');
+                });
+                
+                item.addEventListener('dragend', e => {
+                    e.target.classList.remove('dragging');
+                });
+            });
+            
+            document.querySelectorAll('[id$="ElementsContainer"]').forEach(container => {
+                container.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    const afterElement = getDragAfterElement(container, e.clientY);
+                    const draggable = document.querySelector('.dragging');
+                    if (afterElement == null) {
+                        container.appendChild(draggable);
+                    } else {
+                        container.insertBefore(draggable, afterElement);
+                    }
+                });
+            });
+
+            // Додаємо обробники для кнопок переміщення
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.move-up')) {
+                    const item = e.target.closest('.element-layout-item');
+                    moveElementUp(item);
+                } else if (e.target.closest('.move-down')) {
+                    const item = e.target.closest('.element-layout-item');
+                    moveElementDown(item);
+                }
+            });
+        }
+
+        function moveElementUp(item) {
+            const container = item.parentElement;
+            const prevItem = item.previousElementSibling;
+            if (prevItem) {
+                container.insertBefore(item, prevItem);
+            }
+        }
+
+        function moveElementDown(item) {
+            const container = item.parentElement;
+            const nextItem = item.nextElementSibling;
+            if (nextItem) {
+                container.insertBefore(nextItem, item);
+            }
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.sortable:not(.dragging), .element-layout-item:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Ініціалізація
+        function init() {
+            setupTabSwitching();
+            setupImageUploads();
+            setupAddProduct();
+            setupProductSearch();
+            setupFontSize();
+            setupColorSelection();
+            setupSaveFunctionality();
+            setupPreviewSite();
+            
+            // Завантаження даних при завантаженні сторінки
+            window.addEventListener('load', loadData);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

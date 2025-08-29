@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title id="siteTitle">Ручні вироби</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Animate.css для анімацій -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Шрифти -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Підключаємо Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0284c7;
+            --secondary-color: #374151;
+            --accent-color: #ef4444;
+            --background-color: #f8fafc;
+            --text-color: #334155;
+            --light-color: #f1f5f9;
+            --dark-color: #0f172a;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            /* Динамічні шрифти та базовий розмір */
+            --heading-font: 'Playfair Display', serif;
+            --body-font: 'Open Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--body-font, 'Open Sans', sans-serif);
+            color: var(--text-color);
+            line-height: 1.6;
+            background-color: var(--background-color);
+            /* Обшарманий фон: багатошарові градієнти + фіксований фон */
+            background-image:
+                radial-gradient(at 20% 20%, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0.00) 40%),
+                radial-gradient(at 80% 0%, rgba(251,191,36,0.18) 0%, rgba(255,255,255,0.00) 48%),
+                radial-gradient(at 0% 80%, rgba(14,165,233,0.14) 0%, rgba(255,255,255,0.00) 52%),
+                radial-gradient(at 100% 80%, rgba(239,68,68,0.12) 0%, rgba(255,255,255,0.00) 50%),
+                linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            background-attachment: fixed, fixed, fixed, fixed, fixed;
+            background-size: cover;
+        }
+
+        /* Легка текстура-"шум" зверху (дуже делікатна) */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.06;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.35"/></svg>');
+            background-repeat: repeat;
+            background-size: 320px 320px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--heading-font, 'Playfair Display', serif);
+        }
+
+        .hero-pattern {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 2rem;
+            padding: 2.5rem;
+        }
+
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .product-card {
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 60;
+            padding: 2rem;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Стилі для кнопки мови */
+        .language-switcher {
+            position: relative;
+            display: inline-block;
+        }
+
+        .language-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-btn:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .arrow {
+            margin-left: 6px;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            min-width: 140px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #f1f5f9;
+        }
+
+        .dropdown-item.active {
+            background: #dbeafe;
+        }
+
+        .mobile-language-switcher {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .mobile-language-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-language-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-language-switcher {
+                display: none;
+            }
+        }
+
+        /* Стилі для розділу контактів */
+        .contact-section {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            padding: 4rem 0;
+        }
+
+        .contact-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15);
+        }
+
+        .contact-info {
+            margin-bottom: 2rem;
+        }
+
+        .contact-info i {
+            margin-right: 0.75rem;
+            color: #fff;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .contact-form input::placeholder,
+        .contact-form textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .contact-form textarea {
+            min-height: 150px;
+        }
+
+        .contact-form button {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .contact-form button:hover {
+            background: #0369a1;
+        }
+
+        /* Стилі для футера */
+        footer {
+            background: var(--secondary-color);
+            color: #cbd5e1;
+            padding: 3rem 0 2rem;
+        }
+
+        footer a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        /* Стиль для кнопки "Переглянути товари" */
+        .btn-primary {
+            background-color: #000;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background-color: #1a1a1a;
+        }
+
+        .btn-primary i {
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover i {
+            transform: translateX(0.25rem);
+        }
+    </style>
+</head>
+<body>
+    <!-- Навігація -->
+    <nav class="py-4 px-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="text-2xl font-bold text-primary-700" id="navTitle">РетроШвейка</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="text-primary-600 hover:text-primary-800 font-medium">Головна</a>
+                <a href="#products" class="text-primary-600 hover:text-primary-800 font-medium">Товари</a>
+                <a href="#about" class="text-primary-600 hover:text-primary-800 font-medium">Про мене</a>
+                <a href="#contact" class="text-primary-600 hover:text-primary-800 font-medium">Контакти</a>
+            </div>
+            <!-- Кнопка зміни мови для десктопу -->
+            <div class="language-switcher hidden md:block">
+                <div class="language-btn" id="languageBtn">
+                    <span id="currentLangText">UA</span>
+                    <div class="arrow">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+                <div class="dropdown" id="languageDropdown">
+                    <div class="dropdown-item active" data-lang="ua">
+                        <span>Українська</span>
+                    </div>
+                    <div class="dropdown-item" data-lang="en">
+                        <span>English</span>
+                    </div>
+                </div>
+            </div>
+            <div class="md:hidden flex items-center">
+                <div class="mobile-language-switcher">
+                    <div class="mobile-language-btn" id="mobileLanguageBtn">
+                        <span id="mobileLangText">UA</span>
+                    </div>
+                </div>
+                <button id="mobileMenuBtn" class="text-primary-600 ml-4">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Мобільне меню -->
+    <div id="mobileMenu" class="mobile-menu">
+        <div class="flex justify-end mb-8">
+            <button id="closeMobileMenu" class="text-primary-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div class="flex flex-col space-y-6 text-xl">
+            <a href="#home" class="text-primary-600 hover:text-primary-800 font-medium">Головна</a>
+            <a href="#products" class="text-primary-600 hover:text-primary-800 font-medium">Товари</a>
+            <a href="#about" class="text-primary-600 hover:text-primary-800 font-medium">Про мене</a>
+            <a href="#contact" class="text-primary-600 hover:text-primary-800 font-medium">Контакти</a>
+        </div>
+    </div>
+
+    <!-- Головна секція -->
+    <section id="home" class="section py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="hero-pattern">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-primary-800" id="heroTitle">Ретро швейні вироби</h1>
+                        <h2 class="text-2xl md:text-3xl font-semibold mb-6 text-primary-600" id="heroSubtitle">з душею</h2>
+                        <p class="text-lg mb-8 text-secondary-600" id="heroDescription">Кожен виріб — це унікальна річ, зроблена вручну з любов'ю до деталей. Ми використовуємо якісні натуральні тканини, старовинні вишивки та класичні фасони.</p>
+                        <div id="heroButtons" class="flex flex-col sm:flex-row gap-4">
+                            <a href="#products" class="btn-primary">Переглянути товари<i class="fas fa-arrow-right"></i></a>
+                            <a href="#contact" class="border-2 border-primary-600 text-primary-600 hover:bg-primary-50 font-bold py-3 px-6 rounded-lg transition duration-300 text-center">
+                                Зв'язатися з нами
+                            </a>
+                        </div>
+                        <div id="heroStats" class="grid grid-cols-3 gap-4 pt-6">
+                            <div class="stats-card text-center">
+                                <div class="text-3xl font-bold text-primary-700">12</div>
+                                <div class="text-primary-600 text-sm">Років досвіду</div>
+                            </div>
+                            <div class="stats-card text-center">
+                                <div class="text-3xl font-bold text-primary-700">100+</div>
+                                <div class="text-primary-600 text-sm">Щасливих клієнтів</div>
+                            </div>
+                            <div class="stats-card text-center">
+                                <div class="text-3xl font-bold text-primary-700">500+</div>
+                                <div class="text-primary-600 text-sm">Виробів створено</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="relative">
+                            <img id="heroImage" src="https://placehold.co/500x600/fbbf24/ffffff?text=Ручні+вироби" alt="Ручні вироби" class="rounded-2xl shadow-xl w-full max-w-md">
+                            <div class="absolute -bottom-4 -right-4 bg-white rounded-full p-4 shadow-lg">
+                                <i class="fas fa-hand-sparkles text-primary-500 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Товари -->
+    <section id="products" class="section py-16 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 id="productsTitle" class="section-title text-3xl md:text-4xl font-bold text-primary-800 mx-auto">Наші вироби</h2>
+                <p class="text-lg text-secondary-600 max-w-3xl mx-auto" id="productsDescription">Ознайомтеся з нашою колекцією унікальних ретро виробів ручної роботи</p>
+            </div>
+            <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Товари будуть додані динамічно -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Про мене -->
+    <section id="about" class="section py-16 px-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="order-2 lg:order-1">
+                    <div class="relative">
+                        <img id="aboutImage" src="https://placehold.co/600x700/f87171/ffffff?text=Майстриня" alt="Майстриня" class="rounded-3xl shadow-2xl w-full">
+                        <div class="absolute -bottom-6 -left-6 bg-primary-100 rounded-2xl p-6 shadow-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-award text-primary-600 text-2xl mr-3"></i>
+                                <div>
+                                    <div class="font-bold text-primary-900">12 років</div>
+                                    <div class="text-primary-700 text-sm">досвіду</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2 space-y-6">
+                    <h2 id="aboutTitle" class="section-title text-3xl md:text-4xl font-bold text-primary-800">Про мене</h2>
+                    <p class="text-lg text-secondary-600" id="aboutDescription">Мене звати Юлія, і я займаюся швейною справою вже 12 років. Моє захоплення ретро стилем почалося зі спадщини моєї бабусі — старовинної швейної машинки і колекції вишитих серветок. Кожен виріб, який я створюю, — це унікальна річ, зроблена вручну з любов'ю до деталей. Я використовую якісні натуральні тканини, старовинні вишивки та класичні фасони, які ніколи не виходять з моди. Моя мрія — повернути до життя красу ретро стилю і подарувати людям унікальні речі, які будуть радувати роками.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Контакти -->
+    <section id="contact" class="contact-section">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 id="contactsTitle" class="section-title text-3xl md:text-4xl font-bold text-white mx-auto">Контакти</h2>
+                <p class="text-lg text-primary-200 max-w-3xl mx-auto" id="contactsDescription">Готові до замовлення або хочете дізнатися більше? Зв'яжіться зі мною!</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="contact-card">
+                    <h3 class="text-2xl font-bold text-white mb-6">Зв'яжіться зі мною</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fab fa-telegram text-white text-xl"></i>
+                            <span id="feedbackTelegram">Напишіть нам: @Ennifer86</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-white text-xl"></i>
+                            <span id="feedbackEmail">Email: yulia.retro@gmail.com</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-white text-xl"></i>
+                            <span id="feedbackPhone">Телефон: +38 (098) 765-43-21</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <h3 class="text-2xl font-bold text-white mb-6">Надішліть відгук</h3>
+                    <form id="feedbackForm" class="space-y-4">
+                        <div>
+                            <input type="text" id="feedbackName" placeholder="Ваше ім'я" class="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50">
+                        </div>
+                        <div>
+                            <textarea id="feedbackMessage" rows="4" class="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="Ваш відгук або запитання"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-white text-primary-600 font-bold py-3 px-4 rounded-xl hover:bg-primary-50 transition-colors">Надіслати відгук</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="bg-dark-color text-white py-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-primary-400 rounded-full flex items-center justify-center border-2 border-primary-100">
+                            <span class="text-primary-900 font-bold">Ш</span>
+                        </div>
+                        <span id="footerSiteName" class="text-white font-bold text-xl">Швейка</span>
+                    </div>
+                    <p id="footerText" class="text-primary-200 max-w-md">© 2024 Юлія. Усі права захищені. Створено з любов'ю.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-4">Навігація</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-primary-200 hover:text-white transition">Головна</a></li>
+                        <li><a href="#products" class="text-primary-200 hover:text-white transition">Товари</a></li>
+                        <li><a href="#about" class="text-primary-200 hover:text-white transition">Про мене</a></li>
+                        <li><a href="#contact" class="text-primary-200 hover:text-white transition">Контакти</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-lg mb-4">Контакти</h4>
+                    <ul class="space-y-2">
+                        <li class="text-primary-200">@Ennifer86</li>
+                        <li class="text-primary-200">yulia.retro@gmail.com</li>
+                        <li class="text-primary-200">+38 (098) 765-43-21</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-primary-800 mt-8 pt-6 text-center text-primary-400">
+                <p>Розроблено з ❤️ для любителів ретро стилю</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Конфігурація Firebase - ВАЖЛИВО: Перевірте databaseURL!
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2DjOu0WUzPBinysNFJgF_223NW9mh7Ts",
+            authDomain: "yulia-feb39.firebaseapp.com",
+            // ВАЖЛИВО: databaseURL повинен точно відповідати URL з Firebase Console!
+            databaseURL: "https://yulia-feb39-default-rtdb.firebaseio.com/", // <--- ПЕРЕВІРТЕ ЦЕ
+            projectId: "yulia-feb39",
+            storageBucket: "yulia-feb39.firebasestorage.app",
+            messagingSenderId: "995206586230",
+            appId: "1:995206586230:web:457e6802fa6d622e106457",
+            measurementId: "G-RQT1XKLPD5"
+        };
+
+        // Ініціалізація Firebase з обробкою помилок
+        let db = null;
+        try {
+        firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log('✅ Firebase успішно ініціалізовано в index.html');
+        } catch (error) {
+            console.error('❌ Помилка ініціалізації Firebase в index.html:', error);
+            // Продовжуємо роботу без Firebase
+        }
+
+        // Глобальні змінні
+        let content = {
+            siteName: "РетроШвейка",
+            heroTitle: { ua: "Ретро швейні вироби", en: "Retro Sewing Crafts" },
+            heroSubtitle: { ua: "з душею", en: "with soul" },
+            heroDescription: { ua: "Кожен виріб — це унікальна річ, зроблена вручну з любов'ю до деталей. Ми використовуємо якісні натуральні тканини, старовинні вишивки та класичні фасони.", en: "Each product is a unique handmade item created with love for details. We use quality natural fabrics, vintage embroidery, and classic styles." },
+            productsTitle: { ua: "Наші вироби", en: "Our Products" },
+            productsDescription: { ua: "Ознайомтеся з нашою колекцією унікальних ретро виробів ручної роботи", en: "Explore our collection of unique retro handmade crafts" },
+            contactsTitle: { ua: "Контакти", en: "Contacts" },
+            contactsDescription: { ua: "Готові до замовлення або хочете дізнатися більше? Зв'яжіться зі мною!", en: "Ready to order or want to know more? Contact me!" },
+            aboutTitle: { ua: "Про мене", en: "About Me" },
+            aboutDescription: { ua: "Мене звати Олена (Юлія), і я займаюся швейною справою вже 12 років. Моє захоплення ретро стилем почалося зі спадщини моєї бабусі — старовинної швейної машинки і колекції вишитих серветок. Кожен виріб, який я створюю, — це унікальна річ, зроблена вручну з любов'ю до деталей. Я використовую якісні натуральні тканини, старовинні вишивки та класичні фасони, які ніколи не виходять з моди. Моя мрія — повернути до життя красу ретро стилю і подарувати людям унікальні речі, які будуть радувати роками.", en: "My name is Olena (Yulia), and I have been in the sewing business for 12 years. My passion for retro style began with my grandmother's legacy - a vintage sewing machine and a collection of embroidered napkins. Each product I create is a unique handmade item made with love for details. I use quality natural fabrics, vintage embroidery, and classic styles that never go out of fashion. My dream is to bring the beauty of retro style back to life and give people unique items that will delight them for years to come." },
+            footerText: { ua: "© 2024 Юлія. Усі права захищені. Створено з любов'ю.", en: "© 2024 Yulia. All rights reserved. Made with love." },
+            footerSiteName: { ua: "РетроШвейка", en: "RetroSewing" }
+        };
+
+        let design = {
+            fontSize: 100,
+            defaultLang: 'ua',
+            headingFont: 'Playfair Display',
+            bodyFont: 'Open Sans',
+            colors: {
+                primary: '#0284c7',
+                secondary: '#475569',
+                accent: '#f59e0b'
+            }
+        };
+
+        let products = [
+            {
+                id: "1",
+                name: { ua: "Ретро сукня", en: "Retro Dress" },
+                desc: { ua: "Прекрасна сукня в ретро стилі, вишита вручну.", en: "Beautiful retro dress, hand-embroidered." },
+                price: "1200",
+                img: "https://placehold.co/300x300/fde68a/92400e?text=Ретро+сукня"
+            },
+            {
+                id: "2",
+                name: { ua: "Вишита блузка", en: "Embroidered Blouse" },
+                desc: { ua: "Блузка з тонкого полотна, прикрашена вишивкою.", en: "Blouse made of fine fabric, decorated with embroidery." },
+                price: "800",
+                img: "https://placehold.co/300x300/fde68a/92400e?text=Вишита+блузка"
+            },
+            {
+                id: "3",
+                name: { ua: "Серветки ручної роботи", en: "Handmade Napkins" },
+                desc: { ua: "Набір серветок, вишитих вручну.", en: "Set of handmade embroidered napkins." },
+                price: "300",
+                img: "https://placehold.co/300x300/fde68a/92400e?text=Серветки"
+            }
+        ];
+
+        let images = {
+            heroImage: "https://placehold.co/500x600/fbbf24/ffffff?text=Ручні+вироби",
+            aboutImage: "https://placehold.co/600x700/f87171/ffffff?text=Майстриня",
+            contactImage: "https://placehold.co/400x500/e2e8f0/64748b?text=Фото+контакти"
+        };
+
+        let feedback = {
+            telegram: "@Ennifer86",
+            email: "yulia.retro@gmail.com",
+            phone: "+38 (098) 765-43-21"
+        };
+
+        let currentLang = 'ua';
+
+        // Словник для перекладу статичного контенту
+        const dict = {
+            'nav.home': { ua: 'Головна', en: 'Home' },
+            'nav.products': { ua: 'Товари', en: 'Products' },
+            'nav.about': { ua: 'Про мене', en: 'About' },
+            'nav.contact': { ua: 'Контакти', en: 'Contacts' },
+            'hero.button.products': { ua: 'Переглянути товари', en: 'View Products' },
+            'hero.button.contact': { ua: "Зв'язатися з нами", en: 'Contact Us' },
+            'stats.years': { ua: 'Років досвіду', en: 'Years of experience' },
+            'stats.clients': { ua: 'Щасливих клієнтів', en: 'Happy clients' },
+            'stats.products': { ua: 'Виробів створено', en: 'Products created' },
+            'feedback.form.name': { ua: "Ваше ім'я", en: 'Your name' },
+            'feedback.form.message': { ua: 'Ваш відгук або запитання', en: 'Your feedback or question' },
+            'feedback.form.submit': { ua: 'Надіслати відгук', en: 'Send feedback' },
+            'footer.navigation': { ua: 'Навігація', en: 'Navigation' },
+            'footer.contacts': { ua: 'Контакти', en: 'Contacts' },
+            'footer.developed': { ua: 'Розроблено з ❤️ для любителів ретро стилю', en: 'Developed with ❤️ for retro style lovers' }
+        };
+
+        // Функція для плавної прокрутки
+        function smoothScroll(target) {
+            const element = document.querySelector(target);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Додаткова анімація при прокрутці
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            elements.forEach(element => {
+                observer.observe(element);
+            });
+        }
+
+        // Функція для завантаження даних з Firebase
+        function loadFromFirebase() {
+            // Перевіряємо, чи доступний Firebase
+            if (!db) {
+                console.warn("⚠️ Firebase недоступний, використовуються локальні дані");
+                translateStatic();
+                return;
+            }
+            
+            console.log("Починаю завантаження даних з Firebase...");
+            const siteDataRef = db.ref('siteData');
+            
+            // Спочатку завантажуємо дані один раз
+            siteDataRef.once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    console.log("Дані отримано з Firebase:", data);
+                    if (data) {
+                        updateUIWithData(data);
+                    }
+                    
+                    // Переклад статичного контенту
+                    translateStatic();
+                })
+                .catch((error) => {
+                    console.error("Помилка при завантаженні даних з Firebase:", error);
+                    // Більш конкретне повідомлення про помилку
+                    if (error.code === 'PERMISSION_DENIED') {
+                        console.warn('⚠️ Firebase: Доступ заборонено. Використовуються локальні дані.');
+                    } else if (error.code === 'NETWORK_ERROR' || error.code === 'NETWORK_TIMEOUT') {
+                        console.warn('⚠️ Firebase: Проблема з мережею. Використовуються локальні дані.');
+                    } else {
+                        console.warn('⚠️ Firebase: ' + error.message + '. Використовуються локальні дані.');
+                    }
+                    
+                    // Використовуємо локальні дані при помилці Firebase
+                    translateStatic();
+                });
+            
+            // Встановлюємо слухач для реального часу - зміни в editor.html будуть автоматично відображатися тут
+            // Тільки якщо Firebase доступний
+            if (db) {
+                siteDataRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        console.log("Отримано оновлення в реальному часі:", data);
+                        updateUIWithData(data);
+                        
+                        // Показуємо користувачу, що дані оновлено
+                        const notification = document.createElement('div');
+                        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate__animated animate__fadeInRight';
+                        notification.textContent = 'Сайт оновлено!';
+                        document.body.appendChild(notification);
+                        
+                        // Видаляємо повідомлення через 3 секунди
+                        setTimeout(() => {
+                            notification.classList.remove('animate__fadeInRight');
+                            notification.classList.add('animate__fadeOutRight');
+                            setTimeout(() => {
+                                if (notification.parentNode) {
+                                    notification.parentNode.removeChild(notification);
+                                }
+                            }, 500);
+                        }, 3000);
+                    }
+                });
+            }
+        }
+
+        // Функція для оновлення UI з даними
+        function updateUIWithData(data) {
+                        // Content
+                        if (data.content) {
+                            content = data.content;
+                            document.getElementById('siteTitle').textContent = content.siteName;
+                            document.getElementById('navTitle').textContent = content.siteName;
+                document.getElementById('footerSiteName').textContent = content.footerSiteName[currentLang];
+
+                            if (content.heroTitle) {
+                                document.getElementById('heroTitle').textContent = content.heroTitle[currentLang];
+                            }
+                            if (content.heroSubtitle) {
+                                document.getElementById('heroSubtitle').textContent = content.heroSubtitle[currentLang];
+                            }
+                            if (content.heroDescription) {
+                                document.getElementById('heroDescription').textContent = content.heroDescription[currentLang];
+                            }
+                            if (content.productsTitle) {
+                                document.getElementById('productsTitle').textContent = content.productsTitle[currentLang];
+                            }
+                            if (content.productsDescription) {
+                                document.getElementById('productsDescription').textContent = content.productsDescription[currentLang];
+                            }
+                            if (content.contactsTitle) {
+                                document.getElementById('contactsTitle').textContent = content.contactsTitle[currentLang];
+                            }
+                            if (content.contactsDescription) {
+                                document.getElementById('contactsDescription').textContent = content.contactsDescription[currentLang];
+                            }
+                            if (content.aboutTitle) {
+                                document.getElementById('aboutTitle').textContent = content.aboutTitle[currentLang];
+                            }
+                            if (content.aboutDescription) {
+                                document.getElementById('aboutDescription').textContent = content.aboutDescription[currentLang];
+                            }
+                            if (content.footerText) {
+                    document.getElementById('footerText').textContent = content.footerText[currentLang];
+                            }
+                        }
+
+                        // Feedback
+                        if (data.feedback) {
+                            feedback = data.feedback;
+                            if (feedback.telegram) {
+                                document.getElementById('feedbackTelegram').textContent = `Напишіть нам: ${feedback.telegram}`;
+                            }
+                            if (feedback.email) {
+                                document.getElementById('feedbackEmail').textContent = `Email: ${feedback.email}`;
+                            }
+                            if (feedback.phone) {
+                                document.getElementById('feedbackPhone').textContent = `Телефон: ${feedback.phone}`;
+                            }
+                        }
+
+                        // Images
+                        if (data.images) {
+                            images = data.images;
+                            if (images.heroImage) {
+                                document.getElementById('heroImage').src = images.heroImage;
+                            }
+                            if (images.aboutImage) {
+                                document.getElementById('aboutImage').src = images.aboutImage;
+                            }
+                            if (images.contactImage) {
+                                // Якщо потрібно додати зображення для контактів
+                            }
+                        }
+
+                        // Products
+                        if (data.products) {
+                            products = data.products;
+                            renderProducts();
+                        }
+
+                        // Design
+                        if (data.design) {
+                            design = data.design;
+                            if (design.defaultLang) {
+                                currentLang = design.defaultLang;
+                                updateLanguageUI();
+                            }
+                            // Застосування кольорів
+                            if (design.colors) {
+                                document.documentElement.style.setProperty('--primary-color', design.colors.primary || '#0284c7');
+                                document.documentElement.style.setProperty('--secondary-color', design.colors.secondary || '#475569');
+                                document.documentElement.style.setProperty('--accent-color', design.colors.accent || '#f59e0b');
+                            }
+                // Застосування шрифтів
+                if (design.headingFont) {
+                    document.documentElement.style.setProperty('--heading-font', design.headingFont);
+                }
+                if (design.bodyFont) {
+                    document.documentElement.style.setProperty('--body-font', design.bodyFont);
+                }
+                // Застосування базового розміру шрифту (відсоток)
+                if (typeof design.fontSize === 'number') {
+                    const clamped = Math.max(50, Math.min(200, design.fontSize));
+                    document.documentElement.style.fontSize = clamped + '%';
+                }
+            }
+
+            // Порядок розділів сайту
+            if (Array.isArray(data.layout) && data.layout.length) {
+                const root = document.body;
+                const ids = { home: 'home', products: 'products', about: 'about', contact: 'contact', feedback: 'contact', footer: 'footer' };
+                const containerOrder = data.layout.map(key => document.getElementById(ids[key])).filter(Boolean);
+                const parent = document.body;
+                // Здійснюємо ре-апенд секцій у поточному порядку (зберігаємо структуру між секціями)
+                const sections = ['home','products','about','contact'];
+                const anchors = sections.map(id => document.getElementById(id)).filter(Boolean);
+                const mainParent = anchors.length ? anchors[0].parentElement : null;
+                if (mainParent) {
+                    data.layout.forEach(key => {
+                        const secId = ids[key];
+                        const node = document.getElementById(secId);
+                        if (node && node.parentElement === mainParent) mainParent.appendChild(node);
+                    });
+                }
+            }
+
+            // Порядок елементів усередині розділів
+            if (data.elementLayouts) {
+                // Home
+                if (Array.isArray(data.elementLayouts.home)) {
+                    const home = document.querySelector('#home .max-w-7xl');
+                    if (home) {
+                        const title = document.getElementById('heroTitle');
+                        const subtitle = document.getElementById('heroSubtitle');
+                        const desc = document.getElementById('heroDescription');
+                        const buttons = document.getElementById('heroButtons');
+                        const stats = document.getElementById('heroStats');
+                        const image = document.getElementById('heroImage');
+                        const map = { heroTitle: title, heroSubtitle: subtitle, heroDescription: desc, heroButtons: buttons, heroStats: stats, heroImage: image };
+                        const leftCol = title ? title.closest('div') : null;
+                        const rightCol = image ? image.closest('.relative')?.parentElement : null;
+                        // Якщо дві колонки існують, рендеримо текстові елементи в ліву колонку, картинку — у праву
+                        if (leftCol && rightCol) {
+                            // Текстова колонка очищення і нове замовлення
+                            const textContainer = leftCol.parentElement;
+                            const textBox = leftCol.parentElement;
+                            const textWrap = leftCol.parentElement;
+                            const textParent = leftCol.parentElement;
+                            const columnText = leftCol.parentElement;
+                            const containerText = leftCol.parentElement;
+                            // Реапенд у ліву колонку
+                            const left = leftCol.parentElement;
+                            if (left) {
+                                // знайдемо саму колонку з текстом (order-2 блок у верстці)
+                                const column = document.querySelector('#home .order-2') || leftCol.parentElement;
+                                if (column) {
+                                    // видаляємо поточні вузли і додаємо по порядку
+                                    ['heroTitle','heroSubtitle','heroDescription','heroButtons','heroStats'].forEach(key => {
+                                        const node = map[key];
+                                        if (node && node.parentElement) {
+                                            column.appendChild(node);
+                                        }
+                                    });
+                                }
+                            }
+                            if (rightCol && image) {
+                                rightCol.appendChild(image.closest('div'));
+                            }
+                        }
+                    }
+                }
+                // About
+                if (Array.isArray(data.elementLayouts.about)) {
+                    const aboutSec = document.querySelector('#about .grid');
+                    if (aboutSec) {
+                        const aImg = document.getElementById('aboutImage');
+                        const aTitle = document.getElementById('aboutTitle');
+                        const aDesc = document.getElementById('aboutDescription');
+                        const map = { aboutImage: aImg, aboutTitle: aTitle, aboutDescription: aDesc };
+                        data.elementLayouts.about.forEach(key => {
+                            const node = map[key];
+                            if (node && node.parentElement) node.parentElement.appendChild(node.closest('div'));
+                        });
+                    }
+                }
+            }
+        }
+
+
+
+        // Функція для перекладу статичного контенту
+        function translateStatic() {
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (dict[key]) {
+                    el.textContent = dict[key][currentLang] || el.textContent;
+                }
+            });
+        }
+
+        // Функція для рендерингу товарів
+        function renderProducts() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+
+            products.forEach((prod, index) => {
+                    const name = prod.name[currentLang] || prod.name.ua;
+                    const desc = prod.desc[currentLang] || prod.desc.ua;
+                    const price = prod.price;
+                    const img = prod.img;
+
+                    const card = document.createElement('div');
+                    card.className = 'product-card bg-amber-50 rounded-lg overflow-hidden shadow hover:shadow-md transition-all';
+                    card.style.animationDelay = (index * 0.1) + 's';
+                    card.innerHTML = `
+                        <img src="${img}" alt="${name}" class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-amber-800">${name}</h3>
+                            <p class="text-amber-700 mb-4">${desc}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold text-amber-700">${price} ₴</span>
+                                <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition duration-300">
+                                    Замовити
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+            });
+
+            // Застосування анімацій після рендерингу
+                handleScrollAnimations();
+        }
+
+        // Обробка форми відгуків
+        function handleFeedbackForm() {
+            const form = document.getElementById('feedbackForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const name = document.getElementById('feedbackName').value;
+                    const message = document.getElementById('feedbackMessage').value;
+
+                    if (name && message) {
+                        // Тут можна додати код для збереження відгуку в Firebase
+                        alert('Дякуємо за ваш відгук!');
+                        form.reset();
+                    } else {
+                        alert('Будь ласка, заповніть всі поля');
+                    }
+                });
+            }
+        }
+
+        // Функція для оновлення інтерфейсу мови
+        function updateLanguageUI() {
+            // Оновлення тексту на кнопках
+            document.getElementById('currentLangText').textContent = currentLang === 'ua' ? 'UA' : 'EN';
+            document.getElementById('mobileLangText').textContent = currentLang === 'ua' ? 'UA' : 'EN';
+
+            // Оновлення активного елемента в dropdown
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.lang === currentLang) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Функція для зміни мови
+        function changeLanguage(lang) {
+            currentLang = lang;
+            updateLanguageUI();
+
+            // Оновлення контенту
+            if (content.heroTitle) {
+                document.getElementById('heroTitle').textContent = content.heroTitle[currentLang];
+            }
+            if (content.heroSubtitle) {
+                document.getElementById('heroSubtitle').textContent = content.heroSubtitle[currentLang];
+            }
+            if (content.heroDescription) {
+                document.getElementById('heroDescription').textContent = content.heroDescription[currentLang];
+            }
+            if (content.productsTitle) {
+                document.getElementById('productsTitle').textContent = content.productsTitle[currentLang];
+            }
+            if (content.productsDescription) {
+                document.getElementById('productsDescription').textContent = content.productsDescription[currentLang];
+            }
+            if (content.contactsTitle) {
+                document.getElementById('contactsTitle').textContent = content.contactsTitle[currentLang];
+            }
+            if (content.contactsDescription) {
+                document.getElementById('contactsDescription').textContent = content.contactsDescription[currentLang];
+            }
+            if (content.aboutTitle) {
+                document.getElementById('aboutTitle').textContent = content.aboutTitle[currentLang];
+            }
+            if (content.aboutDescription) {
+                document.getElementById('aboutDescription').textContent = content.aboutDescription[currentLang];
+            }
+
+            // Переклад статичного контенту
+            translateStatic();
+
+            // Оновлення товарів
+            renderProducts();
+        }
+
+        // Ініціалізація подій для кнопки мови
+        function initLanguageSwitcher() {
+            const languageBtn = document.getElementById('languageBtn');
+            const mobileLanguageBtn = document.getElementById('mobileLanguageBtn');
+            const languageDropdown = document.getElementById('languageDropdown');
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+            // Для десктопу
+            languageBtn?.addEventListener('click', () => {
+                languageDropdown.classList.toggle('active');
+            });
+
+            // Для мобільного
+            mobileLanguageBtn?.addEventListener('click', () => {
+                currentLang = currentLang === 'ua' ? 'en' : 'ua';
+                changeLanguage(currentLang);
+            });
+
+            // Обробка вибору мови з dropdown
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const selectedLang = item.dataset.lang;
+                    changeLanguage(selectedLang);
+                    languageDropdown.classList.remove('active');
+                });
+            });
+
+            // Закриття dropdown при кліку поза ним
+            document.addEventListener('click', (e) => {
+                if (!languageBtn?.contains(e.target) && !languageDropdown?.contains(e.target)) {
+                    languageDropdown?.classList.remove('active');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ініціалізація кнопки мови
+            initLanguageSwitcher();
+
+            // Додаткова анімація при завантаженні сторінки
+            setTimeout(() => {
+                handleScrollAnimations();
+            }, 1000);
+
+            // ЗАВАНТАЖЕННЯ ДАНИХ З FIREBASE
+            loadFromFirebase();
+
+            // Обробка форми відгуків
+            handleFeedbackForm();
+
+            // Плавна прокрутка для всіх навігаційних посилань
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('href');
+                    smoothScroll(target);
+                });
+            });
+
+            // Обробка мобільного меню
+            document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+                document.getElementById('mobileMenu').classList.add('active');
+            });
+
+            document.getElementById('closeMobileMenu')?.addEventListener('click', () => {
+                document.getElementById('mobileMenu').classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
